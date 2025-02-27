@@ -10,15 +10,11 @@ import java.awt.event.ActionListener;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class QuakstagramHomeUI extends JFrame {
     private static final int WIDTH = 300;
@@ -91,8 +87,9 @@ public class QuakstagramHomeUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // Never allow
                                                                                                  // horizontal scrolling
-        String[][] sampleData = createSampleData();
-        populateContentPanel(contentPanel, sampleData);
+        String loggedInUser = QuackstagramHomeManager.getLoggedInUser();
+        List<String[]> feedPosts = QuackstagramHomeManager.getFeedPosts(loggedInUser);
+        populateContentPanel(contentPanel, feedPosts);
         add(scrollPane, BorderLayout.CENTER);
 
         // Set up the home panel
@@ -103,9 +100,10 @@ public class QuakstagramHomeUI extends JFrame {
 
     }
 
-    private void populateContentPanel(JPanel panel, String[][] sampleData) {
+    private void populateContentPanel(JPanel panel, List<String[]> posts)
+    {
 
-        for (String[] postData : sampleData) {
+        for (String[] postData : posts) {
             JPanel itemPanel = new JPanel();
             itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.Y_AXIS));
             itemPanel.setBackground(Color.WHITE); // Set the background color for the item panel
@@ -146,7 +144,8 @@ public class QuakstagramHomeUI extends JFrame {
             likeButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    handleLikeAction(imageId, likesLabel);
+                    QuackstagramHomeManager.updateLikeCount(imageId, QuackstagramHomeManager.getLoggedInUser());
+                    refreshDisplayImage(postData, imageId);
                 }
             });
 
@@ -172,117 +171,6 @@ public class QuakstagramHomeUI extends JFrame {
             spacingPanel.setBackground(new Color(230, 230, 230)); // Grey color for spacing
             panel.add(spacingPanel);
         }
-    }
-
-    private void handleLikeAction(String imageId, JLabel likesLabel) {
-        Path detailsPath = Paths.get("img", "image_details.txt");
-        StringBuilder newContent = new StringBuilder();
-        boolean updated = false;
-        String currentUser = "";
-        String imageOwner = "";
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-        // Retrieve the current user from users.txt
-        try (BufferedReader userReader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = userReader.readLine();
-            if (line != null) {
-                currentUser = line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Read and update image_details.txt
-        try (BufferedReader reader = Files.newBufferedReader(detailsPath)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("ImageID: " + imageId)) {
-                    String[] parts = line.split(", ");
-                    imageOwner = parts[1].split(": ")[1];
-                    int likes = Integer.parseInt(parts[4].split(": ")[1]);
-                    likes++; // Increment the likes count
-                    parts[4] = "Likes: " + likes;
-                    line = String.join(", ", parts);
-
-                    // Update the UI
-                    likesLabel.setText("Likes: " + likes);
-                    updated = true;
-                }
-                newContent.append(line).append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Write updated likes back to image_details.txt
-        if (updated) {
-            try (BufferedWriter writer = Files.newBufferedWriter(detailsPath)) {
-                writer.write(newContent.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Record the like in notifications.txt
-            String notification = String.format("%s; %s; %s; %s\n", imageOwner, currentUser, imageId, timestamp);
-            try (BufferedWriter notificationWriter = Files.newBufferedWriter(Paths.get("data", "notifications.txt"),
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-                notificationWriter.write(notification);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String[][] createSampleData() {
-        String currentUser = "";
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                currentUser = line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String followedUsers = "";
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "following.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(currentUser + ":")) {
-                    followedUsers = line.split(":")[1].trim();
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Temporary structure to hold the data
-        String[][] tempData = new String[100][]; // Assuming a maximum of 100 posts for simplicity
-        int count = 0;
-
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("img", "image_details.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null && count < tempData.length) {
-                String[] details = line.split(", ");
-                String imagePoster = details[1].split(": ")[1];
-                if (followedUsers.contains(imagePoster)) {
-                    String imagePath = "img/uploaded/" + details[0].split(": ")[1] + ".png"; // Assuming PNG format
-                    String description = details[2].split(": ")[1];
-                    String likes = "Likes: " + details[4].split(": ")[1];
-
-                    tempData[count++] = new String[] { imagePoster, description, likes, imagePath };
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Transfer the data to the final array
-        String[][] sampleData = new String[count][];
-        System.arraycopy(tempData, 0, sampleData, 0, count);
-
-        return sampleData;
     }
 
     private JButton createIconButton(String iconPath) {
@@ -330,7 +218,8 @@ public class QuakstagramHomeUI extends JFrame {
         likeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                handleLikeAction(imageId, likesLabel); // Update this line
+                QuackstagramHomeManager.updateLikeCount(imageId, QuackstagramHomeManager.getLoggedInUser());
+                refreshDisplayImage(postData, imageId);
                 refreshDisplayImage(postData, imageId); // Refresh the view
             }
         });

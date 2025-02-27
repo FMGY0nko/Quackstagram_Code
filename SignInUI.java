@@ -69,7 +69,7 @@ public class SignInUI extends JFrame {
         // Register button with black text
         btnSignIn = new JButton("Sign-In");
         btnSignIn.addActionListener(this::onSignInClicked);
-        btnSignIn.setBackground(new Color(255, 90, 95)); // Use a red color that matches the mockup
+        btnSignIn.setBackground(new Color(244, 90, 255));
         btnSignIn.setForeground(Color.BLACK); // Set the text color to black
         btnSignIn.setFocusPainted(false);
         btnSignIn.setBorderPainted(false);
