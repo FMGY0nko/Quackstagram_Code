@@ -7,23 +7,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class SignInUI extends JFrame {
-
-    private static final int WIDTH = 300;
-    private static final int HEIGHT = 500;
-
+public class SignInUI extends displayUI {
     private JTextField txtUsername;
-    private JTextField txtPassword;
+    private JTextField txtPassword; 
     private JButton btnSignIn, btnRegisterNow;
     private JLabel lblPhoto;
     private User newUser;
 
     public SignInUI() {
-        setTitle("Quackstagram - Register");
-        setSize(WIDTH, HEIGHT);
-        setMinimumSize(new Dimension(WIDTH, HEIGHT));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(10, 10));
+        super("Quackstagram - Register");
         initializeUI();
     }
 
