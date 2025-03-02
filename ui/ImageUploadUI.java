@@ -1,5 +1,10 @@
+package ui;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import managers.ImageUploadManager;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
@@ -30,20 +35,15 @@ public class ImageUploadUI extends displayUI {
         add(createNavigationPanel(), BorderLayout.SOUTH);
     }
 
-    private JPanel createContentPanel() {
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+    protected JPanel createContentPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         // Image preview
         imagePreviewLabel = new JLabel();
         imagePreviewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         imagePreviewLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT / 3));
-
-        // Set an initial empty icon to the imagePreviewLabel
-        ImageIcon emptyImageIcon = new ImageIcon();
-        imagePreviewLabel.setIcon(emptyImageIcon);
-
-        contentPanel.add(imagePreviewLabel);
+        panel.add(imagePreviewLabel);
 
         // Bio text area
         bioTextArea = new JTextArea("Enter a caption");
@@ -52,20 +52,21 @@ public class ImageUploadUI extends displayUI {
         bioTextArea.setWrapStyleWord(true);
         JScrollPane bioScrollPane = new JScrollPane(bioTextArea);
         bioScrollPane.setPreferredSize(new Dimension(WIDTH - 50, HEIGHT / 6));
-        contentPanel.add(bioScrollPane);
+        panel.add(bioScrollPane);
 
         // Upload button
         uploadButton = new JButton("Upload Image");
         uploadButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadButton.addActionListener(this::uploadAction);
-        contentPanel.add(uploadButton);
+        panel.add(uploadButton);
 
         // Save button (for bio)
         saveButton = new JButton("Save Caption");
         saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         saveButton.addActionListener(this::saveBioAction);
+        panel.add(saveButton);
 
-        return contentPanel;
+        return createContentPanel(panel);
     }
 
     private void uploadAction(ActionEvent event) {
@@ -76,10 +77,18 @@ public class ImageUploadUI extends displayUI {
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
 
-            String imagePath = ImageUploadManager.uploadImage(selectedFile, bioTextArea.getText());
+            int previewWidth = imagePreviewLabel.getWidth() > 0 ? imagePreviewLabel.getWidth() : WIDTH;
+            int previewHeight = imagePreviewLabel.getHeight() > 0 ? imagePreviewLabel.getHeight() : HEIGHT;
 
+            String imagePath = ImageUploadManager.uploadImage(selectedFile, bioTextArea.getText(), previewWidth, 
+            previewHeight);
+            //System.out.println("Uploaded image path: " + imagePath);
             if (imagePath != null) {
                 imagePreviewLabel.setIcon(new ImageIcon(imagePath));
+                uploadButton.setText("Upload Another Image");
+                JOptionPane.showMessageDialog(this, "Image uploaded and preview updated!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Image upload failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

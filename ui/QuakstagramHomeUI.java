@@ -1,5 +1,9 @@
+package ui;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
+import managers.QuackstagramHomeManager;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -51,20 +55,14 @@ public class QuakstagramHomeUI extends displayUI {
         // Content Scroll Panel
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS)); // Vertical box layout
-        JScrollPane scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // Never allow
-                                                                                                 // horizontal scrolling
+        
+        JPanel wrappedContentPanel = createContentPanel(contentPanel);
+
         String loggedInUser = QuackstagramHomeManager.getLoggedInUser();
         List<String[]> feedPosts = QuackstagramHomeManager.getFeedPosts(loggedInUser);
         populateContentPanel(contentPanel, feedPosts);
-        add(scrollPane, BorderLayout.CENTER);
 
-        // Set up the home panel
-
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-        homePanel.add(scrollPane, BorderLayout.CENTER);
-
+        homePanel.add(wrappedContentPanel, BorderLayout.CENTER);
     }
 
     private void populateContentPanel(JPanel panel, List<String[]> posts)
@@ -144,8 +142,7 @@ public class QuakstagramHomeUI extends displayUI {
         imageViewPanel.removeAll(); // Clear previous content
 
         String imageId = new File(postData[3]).getName().split("\\.")[0];
-        JLabel likesLabel = new JLabel(postData[2]); // Update this line
-
+        
         // Display the image
         JLabel fullSizeImageLabel = new JLabel();
         fullSizeImageLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -154,8 +151,7 @@ public class QuakstagramHomeUI extends displayUI {
             BufferedImage originalImage = ImageIO.read(new File(postData[3]));
             BufferedImage croppedImage = originalImage.getSubimage(0, 0, Math.min(originalImage.getWidth(), WIDTH - 20),
                     Math.min(originalImage.getHeight(), HEIGHT - 40));
-            ImageIcon imageIcon = new ImageIcon(croppedImage);
-            fullSizeImageLabel.setIcon(imageIcon);
+            fullSizeImageLabel.setIcon(new ImageIcon(croppedImage));
         } catch (IOException ex) {
             // Handle exception: Image file not found or reading error
             fullSizeImageLabel.setText("Image not found");
@@ -166,36 +162,37 @@ public class QuakstagramHomeUI extends displayUI {
         userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
         JLabel userName = new JLabel(postData[0]);
         userName.setFont(new Font("Arial", Font.BOLD, 18));
-        userPanel.add(userName);// User Name
+        userPanel.add(userName);
 
+        JLabel likesLabel = new JLabel(postData[2]);
         JButton likeButton = new JButton("❤");
         likeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         likeButton.setBackground(LIKE_BUTTON_COLOR); // Set the background color for the like button
         likeButton.setOpaque(true);
         likeButton.setBorderPainted(false); // Remove border
-        likeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                QuackstagramHomeManager.updateLikeCount(imageId, QuackstagramHomeManager.getLoggedInUser());
-                refreshDisplayImage(postData, imageId);
-                refreshDisplayImage(postData, imageId); // Refresh the view
-            }
+        likeButton.addActionListener(e -> {
+            QuackstagramHomeManager.updateLikeCount(imageId, QuackstagramHomeManager.getLoggedInUser());
+            refreshDisplayImage(postData, imageId); // Refresh likes count
         });
 
         // Information panel at the bottom
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.add(new JLabel(postData[1])); // Description
-        infoPanel.add(new JLabel(postData[2])); // Likes
+        infoPanel.add(likesLabel); // Likes count
         infoPanel.add(likeButton);
 
-        imageViewPanel.add(fullSizeImageLabel, BorderLayout.CENTER);
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
+        imagePanel.add(fullSizeImageLabel);
+        JPanel wrappedPanel = createContentPanel(imagePanel);
+        
+        imageViewPanel.add(wrappedPanel, BorderLayout.CENTER);
         imageViewPanel.add(infoPanel, BorderLayout.SOUTH);
         imageViewPanel.add(userPanel, BorderLayout.NORTH);
 
         imageViewPanel.revalidate();
         imageViewPanel.repaint();
-
         cardLayout.show(cardPanel, "ImageView"); // Switch to the image view
     }
 

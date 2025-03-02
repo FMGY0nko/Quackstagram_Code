@@ -1,4 +1,9 @@
+package ui;
+
 import javax.swing.*;
+
+import models.User;
+
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,6 +61,18 @@ public abstract class displayUI extends JFrame {
         navigationPanel.add(createIconButton("img/icons/profile.png", "profile"));
 
         return navigationPanel;
+    }
+    
+    protected JPanel createContentPanel(JComponent content) {
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+    
+        JScrollPane scrollPane = new JScrollPane(content);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    
+        contentPanel.add(scrollPane);
+        return contentPanel;
     }
 
     private JButton createIconButton(String iconPath, String buttonType) {

@@ -1,3 +1,5 @@
+package managers;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,11 +11,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
+import javax.swing.ImageIcon;
+import java.awt.*;
 
 
 public class ImageUploadManager {
-    public static String uploadImage(File selectedFile, String caption) {
+    public static String uploadImage(File selectedFile, String caption, int targetWidth, int targetHeight) {
         try {
             String username = readLoggedInUsername(); // Automatically get the username
             if (username.equals("unknown_user")) {
@@ -31,7 +34,7 @@ public class ImageUploadManager {
 
             saveImageInfo(username + "_" + imageId, username, caption);
 
-            return destPath.toString();
+            return scaleImage(destPath, targetWidth, targetHeight);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error while uploading image: " + e.getMessage());
@@ -97,6 +100,25 @@ public class ImageUploadManager {
             e.printStackTrace();
         }
         return "unknown_user"; // Default if no username is found
+    }
+
+    private static String scaleImage(Path imagePath, int targetWidth, int targetHeight) {
+        ImageIcon imageIcon = new ImageIcon(imagePath.toString());
+        Image img = imageIcon.getImage();
+        int imgWidth = img.getWidth(null);
+        int imgHeight = img.getHeight(null);
+
+        if (imgWidth > 0 && imgHeight > 0) {
+            double widthRatio = (double) targetWidth / imgWidth;
+            double heightRatio = (double) targetHeight / imgHeight;
+            double scale = Math.min(widthRatio, heightRatio);
+            int scaledWidth = (int) (scale * imgWidth);
+            int scaledHeight = (int) (scale * imgHeight);
+            Image scaledImg = img.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImg);
+            return imagePath.toString();
+        }
+        return imagePath.toString();
     }
 
 

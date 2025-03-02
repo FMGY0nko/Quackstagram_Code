@@ -1,4 +1,8 @@
+package ui;
 import javax.swing.*;
+
+import models.User;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
