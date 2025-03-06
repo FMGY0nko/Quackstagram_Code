@@ -6,10 +6,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import managers.CredentialsManager;
 
 public class SignUpUI extends displayUI {
     private JTextField txtUsername;
@@ -18,7 +18,6 @@ public class SignUpUI extends displayUI {
     private JButton btnRegister;
     private JLabel lblPhoto;
     private JButton btnUploadPhoto;
-    private final String credentialsFilePath = "data/credentials.txt";
     private final String profilePhotoStoragePath = "img/storage/profile/";
     private JButton btnSignIn;
 
@@ -112,11 +111,11 @@ public class SignUpUI extends displayUI {
         String password = txtPassword.getText();
         String bio = txtBio.getText();
 
-        if (doesUsernameExist(username)) {
+        if (CredentialsManager.userExists(username)) {
             JOptionPane.showMessageDialog(this, "Username already exists. Please choose a different username.", "Error",
                     JOptionPane.ERROR_MESSAGE);
         } else {
-            saveCredentials(username, password, bio);
+            CredentialsManager.saveUserCredentials(username, password, bio);
             handleProfilePictureUpload();
             dispose();
 
@@ -126,20 +125,6 @@ public class SignUpUI extends displayUI {
                 signInFrame.setVisible(true);
             });
         }
-    }
-
-    private boolean doesUsernameExist(String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(credentialsFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(username + ":")) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     // Method to handle profile picture upload
@@ -158,15 +143,6 @@ public class SignUpUI extends displayUI {
             BufferedImage image = ImageIO.read(file);
             File outputFile = new File(profilePhotoStoragePath + username + ".png");
             ImageIO.write(image, "png", outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveCredentials(String username, String password, String bio) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/credentials.txt", true))) {
-            writer.write(username + ":" + password + ":" + bio);
-            writer.newLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
