@@ -2,4 +2,5 @@ Xylo: Lorin
 Zara: Lorin
 Mystar: Lorin; Zara
 Lorin: Mystar; Zara; Xylo
-Nisrine: Lorin; Zara
+Nisrine: Lorin; Zara; Barbie
+Barbie: Lorin

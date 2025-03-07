@@ -104,8 +104,6 @@ public class SignInUI extends displayUI {
         System.out.println(enteredUsername + " <-> " + enteredPassword);
         User authenticatedUser = CredentialsManager.verifyCredentials(enteredUsername, enteredPassword);
         if (authenticatedUser != null) {
-            System.out.println("It worked");
-
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("data/users.txt"))) {
                 writer.write(authenticatedUser.getUsername() + ":" + enteredPassword);
                 writer.newLine(); // Ensure proper formatting
@@ -121,7 +119,7 @@ public class SignInUI extends displayUI {
                 profileUI.setVisible(true);
             });
         } else {
-            System.out.println("It Didn't");
+            JOptionPane.showMessageDialog(this, "Invalid username or password.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
