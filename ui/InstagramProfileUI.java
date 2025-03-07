@@ -52,7 +52,7 @@ public class InstagramProfileUI extends displayUI {
     }
 
     private JPanel createHeaderPanel() {
-        String loggedInUsername = UserRelationshipManager.getLoggedInUsername(); 
+        String loggedInUsername = readUsername();
         boolean isCurrentUser = loggedInUsername != null && loggedInUsername.equals(currentUser.getUsername());
 
         // Header Panel

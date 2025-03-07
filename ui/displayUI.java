@@ -99,13 +99,15 @@ public abstract class displayUI extends JFrame {
     }
 
     // Common function used in the displays 
-    protected String readUsername() throws IOException {
+    protected String readUsername() {
         Path usersFilePath = Paths.get("data", "users.txt");
         try (BufferedReader reader = Files.newBufferedReader(usersFilePath)) {
             String line = reader.readLine();
             if (line != null) {
                 return line.split(":")[0]; // Extract the username from the first line
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null; // Return null if no username is found
     }
@@ -142,19 +144,7 @@ public abstract class displayUI extends JFrame {
     private void openProfileUI() {
         // Open InstagramProfileUI frame
         this.dispose();
-        String loggedInUsername = "";
-
-        // Read the logged-in user's username from users.txt
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                loggedInUsername = line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        User user = new User(loggedInUsername);
+        User user = new User(readUsername());
         InstagramProfileUI profileUI = new InstagramProfileUI(user);
         profileUI.setVisible(true);
     }

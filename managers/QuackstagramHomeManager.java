@@ -12,23 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class QuackstagramHomeManager {
-
-    private static final Path USERS_FILE = Paths.get("data", "users.txt");
     private static final Path FOLLOWING_FILE = Paths.get("data", "following.txt");
     private static final Path IMAGE_DETAILS_FILE = Paths.get("img", "image_details.txt");
     private static final Path NOTIFICATIONS_FILE = Paths.get("data", "notifications.txt");
-
-    public static String getLoggedInUser() {
-        try (BufferedReader reader = Files.newBufferedReader(USERS_FILE)) {
-            String line = reader.readLine();
-            if (line != null) {
-                return line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "unknown_user"; // Default username if not found
-    }
 
     public static List<String> getFollowedUsers(String currentUser) {
         try (BufferedReader reader = Files.newBufferedReader(FOLLOWING_FILE)) {
