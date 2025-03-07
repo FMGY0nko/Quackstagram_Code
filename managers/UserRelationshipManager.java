@@ -1,38 +1,81 @@
 package managers;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import models.User;
 
 public class UserRelationshipManager {
 
-    private final String followersFilePath = "data/followers.txt";
     private static final String FOLLOWING_FILE_PATH = "data/following.txt";
-    //private static final String FOLLOWERS_FILE_PATH = "data/following.txt";
     private static final String IMAGE_DETAILS_FILE_PATH = "img/image_details.txt";
     private static final String CREDENTIALS_FILE_PATH = "data/credentials.txt";
+    private static final Path USERS_FILE_PATH = Paths.get("data", "users.txt");
 
-    // Method to follow a user
-    public void followUser(String follower, String followed) throws IOException {
-        if (!isAlreadyFollowing(follower, followed)) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(followersFilePath, true))) {
-                writer.write(follower + ":" + followed);
-                writer.newLine();
-            }
+
+    public static boolean followUser(String currentUser, String usernameToFollow) {
+        if (currentUser == null || usernameToFollow == null || currentUser.isEmpty() || usernameToFollow.isEmpty()) {
+            return false; // Invalid input
         }
-    }
 
-    // Method to check if a user is already following another user
-    private boolean isAlreadyFollowing(String follower, String followed) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(followersFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.equals(follower + ":" + followed)) {
-                    return true;
+        boolean found = false;
+        StringBuilder newContent = new StringBuilder();
+
+        try {
+            // Read and process following.txt
+            if (Files.exists(Paths.get(FOLLOWING_FILE_PATH))) {
+                try (BufferedReader reader = Files.newBufferedReader(Paths.get(FOLLOWING_FILE_PATH))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(":");
+                        if (parts[0].trim().equals(currentUser)) {
+                            found = true;
+                            if (!line.contains(usernameToFollow)) {
+                                line = line.concat(line.endsWith(":") ? "" : "; ").concat(usernameToFollow);
+                            }
+                        }
+                        newContent.append(line).append("\n");
+                    }
                 }
             }
+
+            // If the user was not found in following.txt, add them
+            if (!found) {
+                newContent.append(currentUser).append(": ").append(usernameToFollow).append("\n");
+            }
+
+            // Write the updated content back to following.txt
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(FOLLOWING_FILE_PATH))) {
+                writer.write(newContent.toString());
+            }
+            return true; // Successfully followed the user
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false; // Follow action failed
+    }
+
+    
+    // Method to check if a user is already following another user
+    public static boolean isAlreadyFollowing(String currentUser, String usernameToCheck) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(Paths.get(FOLLOWING_FILE_PATH).toFile()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts[0].trim().equals(currentUser)) {
+                    String[] followedUsers = parts[1].split(";");
+                    for (String followedUser : followedUsers) {
+                        if (followedUser.trim().equals(usernameToCheck)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -68,6 +111,7 @@ public class UserRelationshipManager {
         }
         return 0;
     }
+    
     // Method to count the number of posts by a user
     public static int getUserPosts(String username) {
         int postCount = 0;
@@ -106,4 +150,17 @@ public class UserRelationshipManager {
         user.setFollowingCount(getFollowing(user.getUsername()));
         user.setBio(getUserBio(user.getUsername()));
     } 
+
+    public static String getLoggedInUsername() {
+        try (BufferedReader reader = Files.newBufferedReader(USERS_FILE_PATH)) {
+            String line = reader.readLine();
+            if (line != null) {
+                return line.split(":")[0].trim();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; // No logged-in user found
+    }
+
 }

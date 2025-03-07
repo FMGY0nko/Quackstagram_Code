@@ -6,6 +6,10 @@ import managers.CredentialsManager;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class SignInUI extends displayUI {
     private JTextField txtUsername;
@@ -101,6 +105,13 @@ public class SignInUI extends displayUI {
         User authenticatedUser = CredentialsManager.verifyCredentials(enteredUsername, enteredPassword);
         if (authenticatedUser != null) {
             System.out.println("It worked");
+
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("data/users.txt"))) {
+                writer.write(authenticatedUser.getUsername() + ":" + enteredPassword);
+                writer.newLine(); // Ensure proper formatting
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             // Close the SignUpUI frame
             dispose();
 

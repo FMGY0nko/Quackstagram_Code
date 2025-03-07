@@ -9,20 +9,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.awt.*;
 import java.nio.file.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class InstagramProfileUI extends displayUI {
     private static final int PROFILE_IMAGE_SIZE = 80; // Adjusted size for the profile image to match UI
     private static final int GRID_IMAGE_SIZE = WIDTH / 3; // Static size for grid images
     private JPanel contentPanel; // Panel to display the image grid or the clicked image
+    private JButton followButton; 
     private JPanel headerPanel; // Panel for the header
     private JPanel navigationPanel; // Panel for the navigation
     private User currentUser; // User object to store the current user's information
@@ -43,14 +39,6 @@ public class InstagramProfileUI extends displayUI {
         UserRelationshipManager.loadUserData(currentUser); //Now the file reading logic is in UserRelationshipManager
     }
 
-    public InstagramProfileUI() {
-        super("DACS Profile");
-        contentPanel = new JPanel();
-        headerPanel = createHeaderPanel(); // Initialize header panel
-        navigationPanel = createNavigationPanel(); // Initialize navigation panel
-        initializeUI();
-    }
-
     private void initializeUI() {
         getContentPane().removeAll(); // Clear existing components
 
@@ -64,28 +52,11 @@ public class InstagramProfileUI extends displayUI {
     }
 
     private JPanel createHeaderPanel() {
-        boolean isCurrentUser = false;
-        String loggedInUsername = "";
-
-        // Read the logged-in user's username from users.txt
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                loggedInUsername = line.split(":")[0].trim();
-                isCurrentUser = loggedInUsername.equals(currentUser.getUsername());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String loggedInUsername = UserRelationshipManager.getLoggedInUsername(); 
+        boolean isCurrentUser = loggedInUsername != null && loggedInUsername.equals(currentUser.getUsername());
 
         // Header Panel
         JPanel headerPanel = new JPanel();
-        try (Stream<String> lines = Files.lines(Paths.get("data", "users.txt"))) {
-            isCurrentUser = lines.anyMatch(line -> line.startsWith(currentUser.getUsername() + ":"));
-        } catch (IOException e) {
-            e.printStackTrace(); // Log or handle the exception as appropriate
-        }
-
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
         headerPanel.setBackground(Color.GRAY);
 
@@ -114,30 +85,13 @@ public class InstagramProfileUI extends displayUI {
         // Follow or Edit Profile Button
         // followButton.addActionListener(e ->
         // handleFollowAction(currentUser.getUsername()));
-        JButton followButton;
+        followButton = new JButton();
         if (isCurrentUser) {
-            followButton = new JButton("Edit Profile");
+            followButton.setText("Edit Profile");
         } else {
-            followButton = new JButton("Follow");
-
-            // Check if the current user is already being followed by the logged-in user
-            Path followingFilePath = Paths.get("data", "following.txt");
-            try (BufferedReader reader = Files.newBufferedReader(followingFilePath)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(":");
-                    if (parts[0].trim().equals(loggedInUsername)) {
-                        String[] followedUsers = parts[1].split(";");
-                        for (String followedUser : followedUsers) {
-                            if (followedUser.trim().equals(currentUser.getUsername())) {
-                                followButton.setText("Following");
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            followButton.setText("Follow");
+            if (UserRelationshipManager.isAlreadyFollowing(loggedInUsername, currentUser.getUsername())) {
+                followButton.setText("Following");
             }
             followButton.addActionListener(e -> {
                 handleFollowAction(currentUser.getUsername());
@@ -193,56 +147,18 @@ public class InstagramProfileUI extends displayUI {
     }
 
     private void handleFollowAction(String usernameToFollow) {
-        Path followingFilePath = Paths.get("data", "following.txt");
-        Path usersFilePath = Paths.get("data", "users.txt");
-        String currentUserUsername = "";
-
-        try {
-            // Read the current user's username from users.txt
-            try (BufferedReader reader = Files.newBufferedReader(usersFilePath)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(":");
-                    currentUserUsername = parts[0];
-                }
-            }
-
-            System.out.println("Real user is " + currentUserUsername);
-            // If currentUserUsername is not empty, process following.txt
-            if (!currentUserUsername.isEmpty()) {
-                boolean found = false;
-                StringBuilder newContent = new StringBuilder();
-
-                // Read and process following.txt
-                if (Files.exists(followingFilePath)) {
-                    try (BufferedReader reader = Files.newBufferedReader(followingFilePath)) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            String[] parts = line.split(":");
-                            if (parts[0].trim().equals(currentUserUsername)) {
-                                found = true;
-                                if (!line.contains(usernameToFollow)) {
-                                    line = line.concat(line.endsWith(":") ? "" : "; ").concat(usernameToFollow);
-                                }
-                            }
-                            newContent.append(line).append("\n");
-                        }
-                    }
-                }
-
-                // If the current user was not found in following.txt, add them
-                if (!found) {
-                    newContent.append(currentUserUsername).append(": ").append(usernameToFollow).append("\n");
-                }
-
-                // Write the updated content back to following.txt
-                try (BufferedWriter writer = Files.newBufferedWriter(followingFilePath)) {
-                    writer.write(newContent.toString());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    String currentUserUsername = UserRelationshipManager.getLoggedInUsername();
+    if (currentUserUsername != null) {
+        boolean success = UserRelationshipManager.followUser(currentUserUsername, usernameToFollow);
+        if (success) {
+            System.out.println(currentUserUsername + " is now following " + usernameToFollow);
+            initializeUI(); // Refresh the UI to update follow button
+        } else {
+            System.out.println("Failed to follow " + usernameToFollow);
         }
+    } else {
+        System.out.println("No logged-in user found.");
+    }
     }
 
     private JPanel createImageGridPanel() {
@@ -291,7 +207,6 @@ public class InstagramProfileUI extends displayUI {
         // Create a back button to return to the profile grid
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> {
-            getContentPane().removeAll();
             initializeUI(); // Reload the profile grid
         });
     
