@@ -8,13 +8,13 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class ExploreManager {
-        public static File[] loadPostImages() {
-            File imageDir = new File("img/uploaded");
-            if (imageDir.exists() && imageDir.isDirectory()) {
-                return imageDir.listFiles((dir, name) -> name.matches(".*\\.(png|jpg|jpeg)"));
-            }
-            return new File[]{}; // Return empty array if no images are found
+    public static File[] loadPostImages() {
+        File imageDir = new File("img/uploaded");
+        if (imageDir.exists() && imageDir.isDirectory()) {
+            return imageDir.listFiles((dir, name) -> name.matches(".*\\.(png|jpg|jpeg)"));
         }
+        return new File[]{}; // Return empty array if no images are found
+    }
 
     public static String[] getImageDetails(String imageId) {
         Path detailsPath = Paths.get("img", "image_details.txt");
@@ -32,6 +32,4 @@ public class ExploreManager {
         }
         return new String[]{"", "", "", "", "0"}; // Ensure the correct length
     }
-
-
 }

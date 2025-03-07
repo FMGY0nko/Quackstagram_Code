@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 public class ImageUploadUI extends displayUI {
     private JLabel imagePreviewLabel;
     private JTextArea bioTextArea;
+    private JTextArea tagsTextArea;
     private JButton uploadButton;
     private JButton saveButton;
 
@@ -49,6 +50,15 @@ public class ImageUploadUI extends displayUI {
         bioScrollPane.setPreferredSize(new Dimension(WIDTH - 50, HEIGHT / 6));
         panel.add(bioScrollPane);
 
+        // Tags text area
+        tagsTextArea = new JTextArea("Tag users (comma separated)");
+        tagsTextArea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        tagsTextArea.setLineWrap(true);
+        tagsTextArea.setWrapStyleWord(true);
+        JScrollPane tagsScrollPane = new JScrollPane(tagsTextArea);
+        tagsScrollPane.setPreferredSize(new Dimension(WIDTH - 50, HEIGHT / 6));
+        panel.add(tagsScrollPane);
+
         // Upload button
         uploadButton = new JButton("Upload Image");
         uploadButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -82,26 +92,22 @@ public class ImageUploadUI extends displayUI {
                 imagePreviewLabel.setIcon(new ImageIcon(imagePath));
                 uploadButton.setText("Upload Another Image");
                 JOptionPane.showMessageDialog(this, "Image uploaded and preview updated!");
+
+                // Process tags
+                String tags = tagsTextArea.getText();
+                if (!tags.isEmpty()) {
+                    String[] taggedUsers = tags.split(",");
+                    for (String user : taggedUsers) {
+                        user = user.trim();
+                        if (!user.isEmpty()) {
+                            ImageUploadManager.sendTagNotification(user);
+                        }
+                    }
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Image upload failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    private void saveImageInfo(String imageId, String username, String bio) throws IOException {
-        Path infoFilePath = Paths.get("img", "image_details.txt");
-        if (!Files.exists(infoFilePath)) {
-            Files.createFile(infoFilePath);
-        }
-
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-        try (BufferedWriter writer = Files.newBufferedWriter(infoFilePath, StandardOpenOption.APPEND)) {
-            writer.write(String.format("ImageID: %s, Username: %s, Bio: %s, Timestamp: %s, Likes: 0", imageId, username,
-                    bio, timestamp));
-            writer.newLine();
-        }
-
     }
 
     private void saveBioAction(ActionEvent event) {

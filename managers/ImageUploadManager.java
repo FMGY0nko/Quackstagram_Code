@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.ImageIcon;
@@ -121,5 +122,16 @@ public class ImageUploadManager {
         return imagePath.toString();
     }
 
+    public static void sendTagNotification(String taggedUser) {
+        String currentuser = readLoggedInUsername();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String notification = String.format("%s; %s; %s; %s; %s\n", "tag", currentuser, taggedUser, getNextImageId(currentuser), timestamp);
 
+        try (BufferedWriter notificationWriter = Files.newBufferedWriter(Paths.get("data/notifications.txt"),
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+            notificationWriter.write(notification);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

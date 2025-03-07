@@ -1,6 +1,5 @@
 package ui;
 import javax.swing.*;
-
 import models.User;
 import managers.CredentialsManager;
 import java.awt.*;
@@ -24,7 +23,6 @@ public class SignInUI extends displayUI {
         add(createHeaderPanel("Quackstagram 🐥"), BorderLayout.NORTH);
         add(createFieldsPanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
-
     }
 
     private JPanel createFieldsPanel() {

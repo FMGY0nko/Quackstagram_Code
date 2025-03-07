@@ -49,7 +49,20 @@ public class NotificationsUI extends displayUI {
 
                     // Add profile icon (if available) and timestamp
                     // ... (Additional UI components if needed)
-                    
+                }
+                // Checks whether the notification is a tag or not 
+                if (parts[0].trim().equals("tag")) {
+                    if (parts[2].trim().equals(readUsername())) {
+                        String tagger = parts[1].trim();
+                        String timestamp = parts[4].trim();
+
+                        String notificationMessage = tagger + " tagged you in a photo - " + TimeUtils.getElapsedTime(timestamp)
+                            + " ago";
+
+                        // Add the notification to the panel
+                        JLabel notificationLabel = new JLabel(notificationMessage);
+                        notificationPanel.add(notificationLabel, BorderLayout.CENTER);
+                    }
                 }
             }
         } catch (IOException e) {

@@ -61,16 +61,16 @@ private static final String CREDENTIALS_FILE = "data/credentials.txt";
 
     // Method to check if a username already exists (called from SignUpUI)
     public static boolean userExists(String username) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(CREDENTIALS_FILE))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith(username + ":")) {
-                        return true;
-                    }
+        try (BufferedReader reader = new BufferedReader(new FileReader(CREDENTIALS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith(username + ":")) {
+                    return true;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return false;
+    }
 }
