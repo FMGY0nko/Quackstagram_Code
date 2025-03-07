@@ -8,12 +8,9 @@ import java.nio.file.Paths;
 import models.User;
 
 public class UserRelationshipManager {
-
     private static final String FOLLOWING_FILE_PATH = "data/following.txt";
     private static final String IMAGE_DETAILS_FILE_PATH = "img/image_details.txt";
     private static final String CREDENTIALS_FILE_PATH = "data/credentials.txt";
-    private static final Path USERS_FILE_PATH = Paths.get("data", "users.txt");
-
 
     public static boolean followUser(String currentUser, String usernameToFollow) {
         if (currentUser == null || usernameToFollow == null || currentUser.isEmpty() || usernameToFollow.isEmpty()) {
@@ -150,17 +147,4 @@ public class UserRelationshipManager {
         user.setFollowingCount(getFollowing(user.getUsername()));
         user.setBio(getUserBio(user.getUsername()));
     } 
-
-    public static String getLoggedInUsername() {
-        try (BufferedReader reader = Files.newBufferedReader(USERS_FILE_PATH)) {
-            String line = reader.readLine();
-            if (line != null) {
-                return line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null; // No logged-in user found
-    }
-
 }

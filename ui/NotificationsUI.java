@@ -1,17 +1,11 @@
 package ui;
-
 import javax.swing.*;
-
 import utils.TimeUtils;
-
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 public class NotificationsUI extends displayUI {
     public NotificationsUI() {

@@ -2,19 +2,14 @@ package ui;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import managers.ImageUploadManager;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.time.chrono.JapaneseDate;
 import java.time.format.DateTimeFormatter;
 
 public class ImageUploadUI extends displayUI {

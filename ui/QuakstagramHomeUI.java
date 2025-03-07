@@ -2,16 +2,12 @@ package ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
 import managers.QuackstagramHomeManager;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -169,11 +165,7 @@ public class QuakstagramHomeUI extends displayUI {
         setUpImage(fullSizeImageLabel, postData);
 
         // User Info
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
-        JLabel userName = new JLabel(postData[0]);
-        userName.setFont(new Font("Arial", Font.BOLD, 18));
-        userPanel.add(userName);
+        JPanel userPanel = createUserPanel(postData[0]);
 
         // Likes 
         JLabel likesLabel = new JLabel(postData[2]);
@@ -198,6 +190,16 @@ public class QuakstagramHomeUI extends displayUI {
         imageViewPanel.revalidate();
         imageViewPanel.repaint();
         cardLayout.show(cardPanel, "ImageView"); // Switch to the image view
+    }
+
+    public JPanel createUserPanel(String username) {
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
+        JLabel userName = new JLabel(username);
+        userName.setFont(new Font("Arial", Font.BOLD, 18));
+        userPanel.add(userName);
+
+        return userPanel;
     }
 
     private void refreshDisplayImage(String[] postData, String imageId) {

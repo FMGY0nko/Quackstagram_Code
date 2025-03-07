@@ -1,9 +1,7 @@
 package ui;
 
 import javax.swing.*;
-
 import models.User;
-
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;

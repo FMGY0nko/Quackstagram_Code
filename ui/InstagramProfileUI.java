@@ -1,14 +1,10 @@
 package ui;
 
 import javax.swing.*;
-
 import managers.UserRelationshipManager;
 import models.User;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.awt.*;
 import java.nio.file.*;
