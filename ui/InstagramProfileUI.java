@@ -65,18 +65,7 @@ public class InstagramProfileUI extends displayUI {
 
     private JPanel createHeaderPanel() {
         boolean isCurrentUser = false;
-        String loggedInUsername = "";
-
-        // Read the logged-in user's username from users.txt
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                loggedInUsername = line.split(":")[0].trim();
-                isCurrentUser = loggedInUsername.equals(currentUser.getUsername());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String loggedInUsername = readUsername();
 
         // Header Panel
         JPanel headerPanel = new JPanel();
@@ -195,18 +184,9 @@ public class InstagramProfileUI extends displayUI {
     private void handleFollowAction(String usernameToFollow) {
         Path followingFilePath = Paths.get("data", "following.txt");
         Path usersFilePath = Paths.get("data", "users.txt");
-        String currentUserUsername = "";
+        String currentUserUsername = readUsername();
 
         try {
-            // Read the current user's username from users.txt
-            try (BufferedReader reader = Files.newBufferedReader(usersFilePath)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(":");
-                    currentUserUsername = parts[0];
-                }
-            }
-
             System.out.println("Real user is " + currentUserUsername);
             // If currentUserUsername is not empty, process following.txt
             if (!currentUserUsername.isEmpty()) {
