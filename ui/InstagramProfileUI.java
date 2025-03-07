@@ -17,20 +17,15 @@ import java.util.stream.Stream;
 public class InstagramProfileUI extends displayUI {
     private static final int PROFILE_IMAGE_SIZE = 80; // Adjusted size for the profile image to match UI
     private static final int GRID_IMAGE_SIZE = WIDTH / 3; // Static size for grid images
-    private JPanel contentPanel; // Panel to display the image grid or the clicked image
     private JButton followButton; 
-    private JPanel headerPanel; // Panel for the header
-    private JPanel navigationPanel; // Panel for the navigation
     private User currentUser; // User object to store the current user's information
 
     public InstagramProfileUI(User user) {
         super("DACS Profile");
+
         this.currentUser = user;
         initializeUserData();
         System.out.println(currentUser.getPostsCount());
-        contentPanel = new JPanel();
-        headerPanel = createHeaderPanel(); // Initialize header panel
-        navigationPanel = createNavigationPanel(); // Initialize navigation panel
         
         initializeUI();
     }
@@ -43,8 +38,8 @@ public class InstagramProfileUI extends displayUI {
         getContentPane().removeAll(); // Clear existing components
 
         // Re-add the header and navigation panels
-        add(headerPanel, BorderLayout.NORTH);
-        add(navigationPanel, BorderLayout.SOUTH);
+        add(createHeaderPanel(), BorderLayout.NORTH);
+        add(createNavigationPanel(), BorderLayout.SOUTH);
         add(createContentPanel(createImageGridPanel()), BorderLayout.CENTER);
 
         revalidate();
@@ -147,18 +142,18 @@ public class InstagramProfileUI extends displayUI {
     }
 
     private void handleFollowAction(String usernameToFollow) {
-    String currentUserUsername = UserRelationshipManager.getLoggedInUsername();
-    if (currentUserUsername != null) {
-        boolean success = UserRelationshipManager.followUser(currentUserUsername, usernameToFollow);
-        if (success) {
-            System.out.println(currentUserUsername + " is now following " + usernameToFollow);
-            initializeUI(); // Refresh the UI to update follow button
+        String currentUserUsername = readUsername();
+        if (currentUserUsername != null) {
+            boolean success = UserRelationshipManager.followUser(currentUserUsername, usernameToFollow);
+            if (success) {
+                System.out.println(currentUserUsername + " is now following " + usernameToFollow);
+                initializeUI(); // Refresh the UI to update follow button
+            } else {
+                System.out.println("Failed to follow " + usernameToFollow);
+            }
         } else {
-            System.out.println("Failed to follow " + usernameToFollow);
+            System.out.println("No logged-in user found.");
         }
-    } else {
-        System.out.println("No logged-in user found.");
-    }
     }
 
     private JPanel createImageGridPanel() {
