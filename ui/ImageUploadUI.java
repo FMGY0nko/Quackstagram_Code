@@ -85,7 +85,7 @@ public class ImageUploadUI extends displayUI {
             int previewWidth = imagePreviewLabel.getWidth() > 0 ? imagePreviewLabel.getWidth() : WIDTH;
             int previewHeight = imagePreviewLabel.getHeight() > 0 ? imagePreviewLabel.getHeight() : HEIGHT;
 
-            String imagePath = ImageUploadManager.uploadImage(selectedFile, bioTextArea.getText(), previewWidth, 
+            String imagePath = ImageUploadManager.uploadImage(selectedFile, bioTextArea.getText(), tagsTextArea.getText(), previewWidth, 
             previewHeight);
             //System.out.println("Uploaded image path: " + imagePath);
             if (imagePath != null) {

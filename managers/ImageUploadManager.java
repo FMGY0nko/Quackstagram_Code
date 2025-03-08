@@ -17,7 +17,7 @@ import java.awt.*;
 
 
 public class ImageUploadManager {
-    public static String uploadImage(File selectedFile, String caption, int targetWidth, int targetHeight) {
+    public static String uploadImage(File selectedFile, String caption, String tags, int targetWidth, int targetHeight) {
         try {
             String username = readLoggedInUsername(); // Automatically get the username
             if (username.equals("unknown_user")) {
@@ -33,7 +33,7 @@ public class ImageUploadManager {
             Files.createDirectories(destPath.getParent());
             Files.copy(selectedFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
 
-            saveImageInfo(username + "_" + imageId, username, caption);
+            saveImageInfo(username + "_" + imageId, username, caption, tags);
 
             return scaleImage(destPath, targetWidth, targetHeight);
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class ImageUploadManager {
     }
 
 
-    private static void saveImageInfo(String imageId, String username, String caption) {
+    private static void saveImageInfo(String imageId, String username, String caption, String taggedusers) {
         Path infoFilePath = Paths.get("img", "image_details.txt");
 
         try {
@@ -78,8 +78,8 @@ public class ImageUploadManager {
 
             // Write image details
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                String details = String.format("ImageID: %s, Username: %s, Caption: %s, Timestamp: %s, Likes: 0",
-                        imageId, username, caption, timestamp);
+                String details = String.format("ImageID: %s, Username: %s, Caption: %s, Tagged-Users: %s, Timestamp: %s, Likes: 0",
+                        imageId, username, caption, taggedusers, timestamp);
 
                 writer.write(details);
                 writer.newLine();

@@ -59,9 +59,7 @@ public class QuakstagramHomeUI extends displayUI {
         homePanel.add(createContentPanel(contentPanel), BorderLayout.CENTER);
     }
 
-    private void populateContentPanel(JPanel panel, List<String[]> posts)
-    {
-
+    private void populateContentPanel(JPanel panel, List<String[]> posts) {
         for (String[] postData : posts) {
             JPanel itemPanel = createItemPanel();
             
@@ -79,6 +77,13 @@ public class QuakstagramHomeUI extends displayUI {
 
             JLabel likesLabel = new JLabel(postData[2]);
             likesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            // Add tags if available
+            if (postData.length > 4 && !postData[4].isEmpty()) {
+                JLabel tagsLabel = new JLabel("Tagged: " + postData[4]);
+                tagsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                itemPanel.add(tagsLabel);
+            }
 
             itemPanel.add(nameLabel);
             itemPanel.add(imageLabel);
@@ -175,6 +180,9 @@ public class QuakstagramHomeUI extends displayUI {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.add(new JLabel(postData[1])); // Description
+        if (postData.length > 4 && !postData[4].isEmpty()) {
+            infoPanel.add(new JLabel("Tagged: " + postData[4])); // Tags
+        }
         infoPanel.add(likesLabel); // Likes count
         infoPanel.add(likeButton);
 

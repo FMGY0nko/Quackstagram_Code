@@ -60,24 +60,30 @@ public class ExploreUI extends displayUI {
     private void displayImage(String imagePath) {
         getContentPane().removeAll();
         setLayout(new BorderLayout());
-
+    
         add(createHeaderPanel(" Explore 🐥"), BorderLayout.NORTH);
         add(createNavigationPanel(), BorderLayout.SOUTH);
-
+    
         String imageId = new File(imagePath).getName().split("\\.")[0];
         String[] details = ExploreManager.getImageDetails(imageId);
-        String username = details.length >= 5 ? details[1].split(": ")[1] : "";
-        String bio = details.length >= 5 ? details[2].split(": ")[1] : "";
-        String timestampString = details.length >= 5 ? details[3].split(": ")[1] : "";
-        int likes = details.length >= 5 ? Integer.parseInt(details[4].split(": ")[1]) : 0;
-
+        String username = details[1]; // Username
+        System.out.println(username);
+        String bio = details[2]; // Bio
+        System.out.println(bio);
+        String tags = details[3]; // Tags
+        System.out.println(tags);
+        String timestampString = details[4]; // Timestamp
+        System.out.println(timestampString);
+        int likes = Integer.parseInt(details[5]); // Likes
+        System.out.println(likes);
+    
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton usernameLabel = new JButton(username);
         usernameLabel.addActionListener(e -> openProfileUI(username));
         JLabel timeLabel = new JLabel(TimeUtils.getElapsedTime(timestampString) + " ago.");
         topPanel.add(usernameLabel, BorderLayout.WEST);
         topPanel.add(timeLabel, BorderLayout.EAST);
-
+    
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         try {
@@ -86,23 +92,23 @@ public class ExploreUI extends displayUI {
         } catch (IOException ex) {
             imageLabel.setText("Image not found");
         }
-
+    
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        JTextArea bioTextArea = new JTextArea(bio);
+        JTextArea bioTextArea = new JTextArea(bio + "\nTagged Users: " + tags);
         bioTextArea.setEditable(false);
         JLabel likesLabel = new JLabel("Likes: " + likes);
         bottomPanel.add(bioTextArea, BorderLayout.CENTER);
         bottomPanel.add(likesLabel, BorderLayout.SOUTH);
-
+    
         JPanel imagePanel = new JPanel();
         imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
         imagePanel.add(imageLabel);
         JPanel wrappedPanel = createContentPanel(imagePanel); // Uses displayUI
-
+    
         add(topPanel, BorderLayout.NORTH);
         add(wrappedPanel, BorderLayout.CENTER); // Uses displayUI for scrollable image
         add(bottomPanel, BorderLayout.SOUTH);
-
+    
         revalidate();
         repaint();
     }
