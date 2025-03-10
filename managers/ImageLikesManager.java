@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import utils.FileManager;
+
 public class ImageLikesManager {
 
     private final String likesFilePath = "data/likes.txt";
@@ -23,27 +25,26 @@ public class ImageLikesManager {
     // Method to read likes from file
     private Map<String, Set<String>> readLikes() throws IOException {
         Map<String, Set<String>> likesMap = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(likesFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
+        FileManager fileManager = FileManager.getInstance();
+        List<String> lines = fileManager.readFile(likesFilePath);
+        for (String line : lines) {
                 String[] parts = line.split(":");
                 String imageID = parts[0];
                 Set<String> users = Arrays.stream(parts[1].split(",")).collect(Collectors.toSet());
                 likesMap.put(imageID, users);
             }
-        }
         return likesMap;
     }
 
     // Method to save likes to file
     private void saveLikes(Map<String, Set<String>> likesMap) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(likesFilePath, false))) {
+        FileManager fileManager = FileManager.getInstance(); // Use Singleton
+        List<String> lines = new ArrayList<>();
             for (Map.Entry<String, Set<String>> entry : likesMap.entrySet()) {
                 String line = entry.getKey() + ":" + String.join(",", entry.getValue());
-                writer.write(line);
-                writer.newLine();
+                lines.add(line);
             }
-        }
+        fileManager.writeFile(likesFilePath, lines);  
     }
 
 }

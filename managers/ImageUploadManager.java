@@ -1,9 +1,9 @@
 package managers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import utils.FileManager;
+
+import java.util.List;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,46 +60,39 @@ public class ImageUploadManager {
     }
 
 
-    private static void saveImageInfo(String imageId, String username, String caption, String taggedusers) {
-        Path infoFilePath = Paths.get("img", "image_details.txt");
+    private static void saveImageInfo(String imageId, String username, String caption, String taggedUsers) {
+    FileManager fileManager = FileManager.getInstance();
+    Path infoFilePath = Paths.get("img", "image_details.txt");
 
-        try {
-            // Ensure the directory exists before writing the file
-            Files.createDirectories(infoFilePath.getParent());
-
-            // Create the file if it does not exist
-            File file = infoFilePath.toFile();
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            // Generate timestamp
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-            // Write image details
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                String details = String.format("ImageID: %s, Username: %s, Caption: %s, Tagged-Users: %s, Timestamp: %s, Likes: 0",
-                        imageId, username, caption, taggedusers, timestamp);
-
-                writer.write(details);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error: Could not save image details for " + imageId);
-        }
+    // Ensure directory exists
+    try {
+        Files.createDirectories(infoFilePath.getParent());
+    } catch (IOException e) {
+        e.printStackTrace();
+        System.out.println("Error: Could not create directories for " + infoFilePath);
+        return;
     }
 
+    List<String> lines = fileManager.readFile(infoFilePath.toString());
+
+    // Generate timestamp
+    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    // Append new image details
+    String details = String.format("ImageID: %s, Username: %s, Caption: %s, Tagged-Users: %s, Timestamp: %s, Likes: 0",
+            imageId, username, caption, taggedUsers, timestamp);
+
+    lines.add(details);
+    fileManager.writeFile(infoFilePath.toString(), lines);
+    }
+
+
     private static String readLoggedInUsername() {
-        Path usersFilePath = Paths.get("data", "users.txt");
-        try (BufferedReader reader = Files.newBufferedReader(usersFilePath)) {
-            String line = reader.readLine();
-            if (line != null) {
-                return line.split(":")[0].trim(); // Extract the first username from the file
+        FileManager fileManager = FileManager.getInstance();
+        List<String> lines = fileManager.readFile("data/users.txt");
+            if (!lines.isEmpty()) {
+                return lines.get(0).split(":")[0].trim(); // Extract the first username from the file
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return "unknown_user"; // Default if no username is found
     }
 
@@ -123,15 +116,13 @@ public class ImageUploadManager {
     }
 
     public static void sendTagNotification(String taggedUser) {
+        FileManager fileManager = FileManager.getInstance();
         String currentuser = readLoggedInUsername();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         String notification = String.format("%s; %s; %s; %s; %s\n", "tag", currentuser, taggedUser, getNextImageId(currentuser), timestamp);
 
-        try (BufferedWriter notificationWriter = Files.newBufferedWriter(Paths.get("data/notifications.txt"),
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-            notificationWriter.write(notification);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<String> notifications = fileManager.readFile("data/notifications.txt");
+            notifications.add(notification);
+        fileManager.writeFile("data/notifications.txt", notifications);
     }
 }

@@ -1,13 +1,12 @@
 package ui;
 import javax.swing.*;
 import models.User;
+import utils.FileManager;
 import managers.CredentialsManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SignInUI extends displayUI {
     private JTextField txtUsername;
@@ -85,12 +84,12 @@ public class SignInUI extends displayUI {
         System.out.println(enteredUsername + " <-> " + enteredPassword);
         User authenticatedUser = CredentialsManager.verifyCredentials(enteredUsername, enteredPassword);
         if (authenticatedUser != null) {
-            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("data/users.txt"))) {
-                writer.write(authenticatedUser.getUsername() + ":" + enteredPassword);
-                writer.newLine(); // Ensure proper formatting
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            FileManager fileManager = FileManager.getInstance(); // Use Singleton FileManager
+            List<String> userData = new ArrayList<>();
+            userData.add(authenticatedUser.getUsername() + ":" + enteredPassword);
+
+            fileManager.writeFile("data/users.txt", userData); 
+
             // Close the SignUpUI frame
             dispose();
 
